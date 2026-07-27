@@ -328,7 +328,8 @@ body.present .present-ui{display:flex!important}
 
 /* ---------- SPOTLIGHT (destaque ao vivo) ---------- */
 body.spot #content .bwrap{transition:opacity .35s,filter .35s}
-body.spot #content .bwrap:not(.spot-on){opacity:.16;filter:saturate(.5)}
+body.spot #content .bwrap:not(.spot-on){animation:none;opacity:.16;filter:saturate(.5)}
+body.spot #content .spot-on{animation:none;opacity:1;transform:none}
 .spot-on{z-index:2}
 .spot-on .bwrap{opacity:1!important;filter:none!important}
 .spot-ring{position:absolute;inset:-16px -20px;pointer-events:none;z-index:3}
