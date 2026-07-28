@@ -71,6 +71,9 @@ button{font-family:var(--body);cursor:pointer}
 .nav-it .nn{width:22px;height:22px;border-radius:50%;border:1.5px solid rgba(255,255,255,.28);color:var(--muted-d);font-size:10.5px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .nav-it.on .nn{background:var(--green);border-color:var(--green);color:var(--petrol)}
 .nav-it.seen .nn{border-color:rgba(191,229,58,.55);color:var(--green)}
+.nav-it .oculta{font-size:9px;letter-spacing:.1em;text-transform:uppercase;font-weight:800;color:var(--me);border:1px solid rgba(224,163,47,.5);border-radius:5px;padding:1px 5px;margin-left:6px;white-space:nowrap}
+.aviso-oculta{display:flex;align-items:center;gap:10px;background:var(--me-bg);border:1px solid #F0DCB0;border-left:4px solid var(--me);border-radius:12px;padding:12px 16px;margin-bottom:20px;font-size:13.5px;color:#7A5A12;line-height:1.5}
+.aviso-oculta b{color:#5C4409}
 .side-foot{padding:16px 24px 20px;border-top:1px solid var(--line-d)}
 .side-foot img{height:15px;opacity:.9}
 .side-foot .endorse-l{text-align:left;margin-bottom:6px}
@@ -730,7 +733,8 @@ function renderNav(){
   S.content.sections.forEach(function(sec, i){
     var b = document.createElement('button');
     b.className = 'nav-it' + (i===S.idx?' on':'') + (S.seen[i]&&i!==S.idx?' seen':'');
-    b.innerHTML = '<span class="nn">'+(S.seen[i]&&i!==S.idx?'✓':(i+1))+'</span><span data-ep="sections.'+i+'.nav">'+esc(sec.nav||sec.title||('Seção '+(i+1)))+'</span>';
+    b.innerHTML = '<span class="nn">'+(S.seen[i]&&i!==S.idx?'✓':(i+1))+'</span><span data-ep="sections.'+i+'.nav">'+esc(sec.nav||sec.title||('Seção '+(i+1)))+'</span>'
+      + (sec.adminOnly ? '<span class="oculta">oculta</span>' : '');
     b.addEventListener('click', function(){ go(i); $('side').classList.remove('open'); });
     el.appendChild(b);
   });
@@ -776,6 +780,11 @@ function renderSection(){
     + (sec.subtitle ? '<p class="sec-sub" data-ep="'+base+'.subtitle">'+fmt(sec.subtitle)+'</p>' : '')
     + '<div class="rule"></div></div>';
   wrap.innerHTML = head;
+  if (sec.adminOnly){
+    wrap.insertBefore(el('aviso-oculta',
+      '<span>🔒</span><span><b>Seção oculta para o cliente.</b> Ela não aparece para quem entra com a senha de leitura, e o conteúdo nem chega ao navegador dele. Para liberar, troque <b>adminOnly</b> para false no JSON da seção.</span>'),
+      wrap.firstChild);
+  }
   var blocksEl = document.createElement('div'); blocksEl.className = 'blocks';
   (sec.blocks||[]).forEach(function(b, bi){
     blocksEl.appendChild(renderBlockWrap(b, base+'.blocks', bi));
