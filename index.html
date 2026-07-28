@@ -190,6 +190,13 @@ button{font-family:var(--body);cursor:pointer}
 .b-table td b{color:var(--petrol)}
 .b-table tr.hl td{background:var(--lime-soft)}
 .b-table td.hl{background:var(--lime-soft);color:var(--petrol);font-weight:600}
+.b-table tr.t-good td:nth-child(2){background:var(--lo-bg);color:var(--lo);font-weight:800;white-space:nowrap}
+.b-table tr.t-warn td:nth-child(2){background:var(--me-bg);color:#B57D14;font-weight:800;white-space:nowrap}
+.b-table tr.t-bad td:nth-child(2){background:var(--err-bg);color:var(--err);font-weight:800;white-space:nowrap}
+.b-table tr.t-none td:nth-child(2){background:var(--panel);color:var(--soft);font-weight:800;white-space:nowrap}
+.b-table tr.t-bad td:first-child{box-shadow:inset 3px 0 0 var(--err)}
+.b-table tr.t-warn td:first-child{box-shadow:inset 3px 0 0 var(--me)}
+.b-table tr.t-good td:first-child{box-shadow:inset 3px 0 0 var(--lo)}
 
 .b-stars{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:#fff}
 .b-stars table{width:100%;border-collapse:collapse;min-width:680px;font-size:13px}
@@ -864,7 +871,8 @@ function renderBlock(b, p){
     b.headers.forEach(function(x){ h += '<th>'+fmt(x)+'</th>'; });
     h += '</tr></thead><tbody>';
     b.rows.forEach(function(r,ri){
-      h += '<tr'+(b.hlRow===ri?' class="hl"':'')+'>';
+      var cls = (b.hlRow===ri ? 'hl' : '') + ((b.tones && b.tones[ri]) ? ' t-'+b.tones[ri] : '');
+      h += '<tr'+(cls.trim() ? ' class="'+cls.trim()+'"' : '')+'>';
       r.forEach(function(c,ci){ h += '<td'+(b.hlCol===ci?' class="hl"':'')+' data-ep="'+p+'.rows.'+ri+'.'+ci+'">'+fmt(c)+'</td>'; });
       h += '</tr>';
     });
