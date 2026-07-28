@@ -301,6 +301,17 @@ button{font-family:var(--body);cursor:pointer}
 .pc-col.good li::before{content:"+";position:absolute;left:0;top:3px;font-weight:800;color:var(--lo)}
 .pc-col.bad li::before{content:"–";position:absolute;left:0;top:3px;font-weight:800;color:var(--err)}
 
+/* ---------- TOOLTIP DE JUSTIFICATIVA ---------- */
+#tip{position:fixed;z-index:98;max-width:340px;background:var(--petrol);color:#E8F1EF;border-radius:12px;padding:13px 15px;font-size:12.8px;line-height:1.5;box-shadow:0 22px 55px -22px rgba(0,33,49,.65);display:none;pointer-events:none;border:1px solid rgba(191,229,58,.25)}
+#tip.on{display:block}
+#tip b{color:var(--green)}
+#tip .tip-h{display:block;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:800;color:var(--green);margin-bottom:6px}
+[data-tip]{cursor:help}
+.b-stars td[data-tip]:hover{background:var(--lime-soft)}
+.b-stars td[data-tip] .stars-s{border-bottom:1px dotted var(--soft);padding-bottom:2px}
+.quad-pt[data-tip]{cursor:help}
+.quad-pt[data-tip]:hover{border-color:var(--green);box-shadow:0 12px 30px -12px rgba(0,33,49,.5)}
+
 /* ---------- JORNADA SUGERIDA (FLOW) ---------- */
 .b-flow{display:flex;flex-direction:column;gap:16px}
 .fphase{border:1px solid var(--line);border-radius:16px;background:#fff;overflow:hidden;box-shadow:0 14px 34px -30px rgba(0,33,49,.3)}
@@ -544,6 +555,8 @@ body.editing .addblock{display:block}
     </div>
   </div>
 </div>
+
+<div id="tip"></div>
 
 <div id="lightbox">
   <span class="lb-count" id="lb-count"></span>
@@ -866,7 +879,8 @@ function renderBlock(b, p){
       r.values.forEach(function(v,vi){
         var s = '';
         for (var k=1;k<=5;k++) s += k<=v ? '★' : '<span class="off">★</span>';
-        h += '<td'+(b.hl===vi?' class="hl"':'')+'><span class="stars-s">'+s+'</span></td>';
+        var nota = (r.notes && r.notes[vi]) ? ' data-tip="'+esc(r.notes[vi])+'" data-tip-head="'+esc(b.brands[vi]+' · '+r.label)+'"' : '';
+        h += '<td'+(b.hl===vi?' class="hl"':'')+nota+'><span class="stars-s">'+s+'</span></td>';
       });
       h += '</tr>';
     });
@@ -890,7 +904,10 @@ function renderBlock(b, p){
       s.style.left = (50 + pt.x*38) + '%';
       s.style.top = (50 - pt.y*38) + '%';
       s.textContent = pt.name;
-      if (pt.desc) s.title = pt.desc;
+      if (pt.desc){
+        s.setAttribute('data-tip', pt.desc);
+        s.setAttribute('data-tip-head', pt.name);
+      }
       area.appendChild(s);
     });
     d.appendChild(area);
@@ -1251,6 +1268,41 @@ function toast(html){
   var t = $('toast'); t.innerHTML = html; t.classList.add('on');
   clearTimeout(toastT); toastT = setTimeout(function(){ t.classList.remove('on'); }, 3600);
 }
+
+/* ================= TOOLTIP DE JUSTIFICATIVA ================= */
+function posTip(x, y){
+  var t = $('tip'), r = t.getBoundingClientRect();
+  var left = Math.min(Math.max(10, x - r.width/2), window.innerWidth - r.width - 10);
+  var top = y - r.height - 16;
+  if (top < 10) top = y + 22;
+  t.style.left = left + 'px';
+  t.style.top = top + 'px';
+}
+function showTip(el, x, y){
+  var txt = el.getAttribute('data-tip');
+  if (!txt) return;
+  var head = el.getAttribute('data-tip-head');
+  $('tip').innerHTML = (head ? '<span class="tip-h">' + esc(head) + '</span>' : '') + fmt(txt);
+  $('tip').classList.add('on');
+  posTip(x, y);
+}
+function hideTip(){ $('tip').classList.remove('on'); }
+document.addEventListener('mouseover', function(e){
+  var el = e.target.closest && e.target.closest('[data-tip]');
+  if (el && !S.editing) showTip(el, e.clientX, e.clientY);
+});
+document.addEventListener('mousemove', function(e){
+  if ($('tip').classList.contains('on')){
+    var el = e.target.closest && e.target.closest('[data-tip]');
+    if (el) posTip(e.clientX, e.clientY); else hideTip();
+  }
+});
+document.addEventListener('click', function(e){
+  if (S.present || S.editing) return;
+  var el = e.target.closest && e.target.closest('[data-tip]');
+  if (el) showTip(el, e.clientX, e.clientY); else hideTip();
+});
+window.addEventListener('scroll', hideTip, true);
 
 /* ================= EVIDÊNCIAS (mídia protegida) ================= */
 S.media = {};
